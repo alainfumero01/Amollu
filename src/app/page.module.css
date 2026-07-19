@@ -253,6 +253,8 @@
 .services,
 .plans,
 .about,
+.serviceDetails,
+.faq,
 .quote {
   padding: clamp(58px, 8vw, 100px) clamp(20px, 5vw, 72px);
 }
@@ -466,6 +468,91 @@
   color: var(--muted);
 }
 
+.serviceDetails {
+  background: #fffdf8;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.detailGrid article {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-height: 224px;
+  padding: 26px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.detailGrid h3 {
+  color: var(--navy);
+  font-size: 1rem;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.detailGrid p,
+.faqList p {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.faq {
+  background: var(--paper);
+}
+
+.faqList {
+  display: grid;
+  gap: 12px;
+  max-width: 940px;
+  margin: 0 auto;
+}
+
+.faqList details {
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.faqList summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 64px;
+  padding: 18px 22px;
+  color: var(--navy);
+  font-weight: 900;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faqList summary::-webkit-details-marker {
+  display: none;
+}
+
+.faqList summary::after {
+  content: "+";
+  flex: 0 0 auto;
+  color: var(--gold);
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.faqList details[open] summary::after {
+  content: "-";
+}
+
+.faqList p {
+  padding: 0 22px 20px;
+}
+
 .quote {
   display: grid;
   grid-template-columns: minmax(0, 0.8fr) minmax(340px, 1fr);
@@ -637,6 +724,10 @@
     grid-template-columns: 1fr;
   }
 
+  .detailGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .quoteIntro {
     position: static;
   }
@@ -663,6 +754,7 @@
 
   .serviceGrid,
   .planGrid,
+  .detailGrid,
   .footer {
     grid-template-columns: 1fr;
   }
@@ -691,6 +783,8 @@
   .services,
   .plans,
   .about,
+  .serviceDetails,
+  .faq,
   .quote {
     padding-top: 48px;
     padding-bottom: 48px;

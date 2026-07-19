@@ -1,0 +1,28 @@
+# Amollu Services
+
+> Amollu Services provides residential, commercial, and facility property care, including cleaning, maintenance support, recurring upkeep, and quote-based service plans.
+
+Website: https://www.amolluservices.com
+Email: Info@amollu.com
+Phone: 682-560-0797
+
+## Primary Content
+
+- [Home](https://www.amolluservices.com): Overview of Amollu Services, service categories, quote-based plans, contact details, and quote request form.
+- [Services](https://www.amolluservices.com/#services): Residential services, commercial services, and facility solutions.
+- [Service Details](https://www.amolluservices.com/#service-details): Plain-language descriptions of property care options.
+- [FAQ](https://www.amolluservices.com/#faq): Common questions about services, quote requests, pricing approach, recurring care, and follow-up.
+- [Quote Request](https://www.amolluservices.com/#quote): Lead form for property care quote requests.
+
+## Services
+
+- Residential property care: Cleaning, routine upkeep, property checks, recurring care, and maintenance support based on the needs of the property.
+- Commercial property care: Cleaning and maintenance coordination for offices, suites, and business properties.
+- Facility solutions: Scheduled care, issue spotting, service coordination, and practical support for ongoing property operations.
+- Quote-based service plans: Service scope, cadence, and priorities are confirmed through a quote conversation.
+
+## Important Notes
+
+- Amollu Services does not publish standard pricing on the website.
+- The website does not publish customer reviews, ratings, addresses, or unsupported service-area claims.
+- Contact Amollu Services directly to confirm service fit, availability, and quote details.

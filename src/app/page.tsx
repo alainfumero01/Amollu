@@ -21,6 +21,7 @@ import styles from "./page.module.css";
 const email = "Info@amollu.com";
 const phoneDisplay = "682-560-0797";
 const phoneHref = "tel:6825600797";
+const siteUrl = "https://www.amolluservices.com";
 
 const services = [
   {
@@ -67,6 +68,119 @@ const stats = [
   ["Flexible", "Quote-based plans"],
 ];
 
+const serviceDetails = [
+  {
+    title: "Residential property care",
+    text: "Homeowners can request cleaning, routine upkeep, property checks, recurring care, and maintenance support based on the needs of the property.",
+  },
+  {
+    title: "Commercial property care",
+    text: "Businesses can request cleaning and maintenance coordination for offices, suites, and other commercial spaces that need reliable follow-through.",
+  },
+  {
+    title: "Facility solutions",
+    text: "Facility requests can include scheduled care, issue spotting, service coordination, and practical support for ongoing property operations.",
+  },
+  {
+    title: "Quote-based service plans",
+    text: "Amollu Services does not publish one-size-fits-all pricing. Each request starts with a quote conversation so scope, cadence, and priorities are clear.",
+  },
+];
+
+const faqs = [
+  {
+    question: "What services does Amollu Services provide?",
+    answer:
+      "Amollu Services provides residential property care, commercial property care, cleaning, maintenance support, recurring upkeep, and facility solutions.",
+  },
+  {
+    question: "How do I request a quote from Amollu Services?",
+    answer:
+      "Submit the quote form on this website, email Info@amollu.com, or call 682-560-0797. A team member will review the request and follow up.",
+  },
+  {
+    question: "Does Amollu Services publish standard pricing?",
+    answer:
+      "Amollu Services uses quote-based plans because every property can have different service needs, schedules, and priorities.",
+  },
+  {
+    question: "Can Amollu Services help with recurring property care?",
+    answer:
+      "Yes. The quote form includes recurring property care as a requested service option, and the team can discuss routine, premium, or full-support plans.",
+  },
+  {
+    question: "What happens after I submit the website form?",
+    answer:
+      "The request is sent to Amollu Services, a confirmation email is sent to the requester, and the team can follow up using the details provided.",
+  },
+];
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}/#website`,
+      name: "Amollu Services",
+      url: siteUrl,
+      publisher: {
+        "@id": `${siteUrl}/#business`,
+      },
+      inLanguage: "en-US",
+    },
+    {
+      "@type": ["LocalBusiness", "HomeAndConstructionBusiness"],
+      "@id": `${siteUrl}/#business`,
+      name: "Amollu Services",
+      url: siteUrl,
+      logo: `${siteUrl}/brand/amollu-logo-horizontal.png`,
+      image: `${siteUrl}/brand/amollu-logo-horizontal.png`,
+      email,
+      telephone: "+1-682-560-0797",
+      priceRange: "Quote-based",
+      description:
+        "Amollu Services provides residential, commercial, and facility property care, including cleaning, maintenance support, recurring upkeep, and quote-based service plans.",
+      contactPoint: [
+        {
+          "@type": "ContactPoint",
+          telephone: "+1-682-560-0797",
+          email,
+          contactType: "customer service",
+          availableLanguage: ["English"],
+        },
+      ],
+      hasOfferCatalog: {
+        "@type": "OfferCatalog",
+        name: "Amollu Services property care",
+        itemListElement: serviceDetails.map((service) => ({
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: service.title,
+            description: service.text,
+            provider: {
+              "@id": `${siteUrl}/#business`,
+            },
+          },
+          url: `${siteUrl}/#quote`,
+        })),
+      },
+    },
+    {
+      "@type": "FAQPage",
+      "@id": `${siteUrl}/#faq-schema`,
+      mainEntity: faqs.map((faq) => ({
+        "@type": "Question",
+        name: faq.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: faq.answer,
+        },
+      })),
+    },
+  ],
+};
+
 type SubmitState = "idle" | "loading" | "success" | "error";
 
 export default function HomePage() {
@@ -106,6 +220,10 @@ export default function HomePage() {
 
   return (
     <main className={styles.page}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <header className={styles.header}>
         <a className={styles.brand} href="#top" aria-label="Amollu Services home">
           <Image
@@ -125,6 +243,9 @@ export default function HomePage() {
           </a>
           <a href="#about" onClick={() => setMenuOpen(false)}>
             About
+          </a>
+          <a href="#faq" onClick={() => setMenuOpen(false)}>
+            FAQ
           </a>
           <a href="#quote" onClick={() => setMenuOpen(false)}>
             Contact
@@ -276,6 +397,36 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className={styles.serviceDetails} id="service-details" aria-labelledby="service-details-heading">
+        <div className={styles.sectionIntro}>
+          <p className={styles.eyebrow}>Service details</p>
+          <h2 id="service-details-heading">Clear property care options for homeowners and businesses.</h2>
+        </div>
+        <div className={styles.detailGrid}>
+          {serviceDetails.map((service) => (
+            <article key={service.title}>
+              <h3>{service.title}</h3>
+              <p>{service.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.faq} id="faq" aria-labelledby="faq-heading">
+        <div className={styles.sectionIntro}>
+          <p className={styles.eyebrow}>Common questions</p>
+          <h2 id="faq-heading">Answers about Amollu Services and quote requests.</h2>
+        </div>
+        <div className={styles.faqList}>
+          {faqs.map((faq) => (
+            <details key={faq.question}>
+              <summary>{faq.question}</summary>
+              <p>{faq.answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
       <section className={styles.quote} id="quote">
         <div className={styles.quoteIntro}>
           <p className={styles.eyebrow}>Request a free estimate</p>
@@ -369,6 +520,7 @@ export default function HomePage() {
           <a href="#services">Services</a>
           <a href="#plans">Plans</a>
           <a href="#about">About</a>
+          <a href="#faq">FAQ</a>
           <a href="#quote">Contact</a>
         </div>
         <div className={styles.footerContact}>
