@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { syncQuoteToJobber, type JobberSyncResult } from "@/lib/jobber";
 
 type QuoteRequest = {
   name?: unknown;
@@ -9,6 +10,13 @@ type QuoteRequest = {
   service?: unknown;
   message?: unknown;
 };
+
+type JobberEmailStatus =
+  | JobberSyncResult
+  | {
+      status: "failed";
+      message: string;
+    };
 
 const destinationEmail = process.env.QUOTE_TO_EMAIL || "Info@amollu.com";
 const phoneDisplay = "682-560-0797";
@@ -69,13 +77,18 @@ function ownerHtml(fields: {
   propertyType: string;
   service: string;
   message: string;
-}) {
+}, jobberStatus: JobberEmailStatus) {
+  const jobberValue =
+    jobberStatus.status === "synced"
+      ? `Synced to request ${jobberStatus.requestId}`
+      : jobberStatus.message;
   const rows = [
     ["Name", fields.name],
     ["Email", fields.email],
     ["Phone", fields.phone || "Not provided"],
     ["Property type", fields.propertyType],
     ["Requested service", fields.service],
+    ["Jobber sync", jobberValue],
   ];
 
   return shell(`
@@ -96,6 +109,11 @@ function ownerHtml(fields: {
         </table>
         <p style="margin:0 0 8px;color:#5f687b;font-size:14px;">Message</p>
         <p style="margin:0;padding:16px;background:#fbfaf7;border:1px solid #eee6d8;border-radius:6px;color:#17213f;line-height:1.6;">${escapeHtml(fields.message).replace(/\n/g, "<br>")}</p>
+        ${
+          jobberStatus.status === "synced" && jobberStatus.requestUrl
+            ? `<p style="margin:18px 0 0;"><a href="${escapeHtml(jobberStatus.requestUrl)}" style="color:#c98924;font-weight:700;text-decoration:none;">Open this request in Jobber</a></p>`
+            : ""
+        }
       </td>
     </tr>`);
 }
@@ -151,6 +169,16 @@ export async function POST(request: Request) {
   }
 
   const resend = new Resend(apiKey);
+  let jobberStatus: JobberEmailStatus;
+
+  try {
+    jobberStatus = await syncQuoteToJobber({ name, email, phone, propertyType, service, message });
+  } catch (error) {
+    jobberStatus = {
+      status: "failed",
+      message: error instanceof Error ? error.message : "Jobber sync failed.",
+    };
+  }
 
   try {
     const ownerEmail = await resend.emails.send({
@@ -158,7 +186,7 @@ export async function POST(request: Request) {
       to: destinationEmail,
       replyTo: email,
       subject: `New Amollu quote request from ${name}`,
-      html: ownerHtml({ name, email, phone, propertyType, service, message }),
+      html: ownerHtml({ name, email, phone, propertyType, service, message }, jobberStatus),
       text: [
         "New quote request from amollu.com",
         "",
@@ -167,6 +195,11 @@ export async function POST(request: Request) {
         `Phone: ${phone || "Not provided"}`,
         `Property type: ${propertyType}`,
         `Requested service: ${service}`,
+        `Jobber sync: ${
+          jobberStatus.status === "synced"
+            ? `Synced to request ${jobberStatus.requestId}${jobberStatus.requestUrl ? ` (${jobberStatus.requestUrl})` : ""}`
+            : jobberStatus.message
+        }`,
         "",
         "Message:",
         message,
