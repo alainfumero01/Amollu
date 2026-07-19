@@ -76,10 +76,11 @@ export default function HomePage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
     setSubmitState("loading");
     setMessage("");
 
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(form);
     const payload = Object.fromEntries(formData.entries());
 
     try {
@@ -94,7 +95,7 @@ export default function HomePage() {
         throw new Error(result.message || "Please try again in a moment.");
       }
 
-      event.currentTarget.reset();
+      form.reset();
       setSubmitState("success");
       setMessage(result.message || "Thanks. Your request has been sent.");
     } catch (error) {
