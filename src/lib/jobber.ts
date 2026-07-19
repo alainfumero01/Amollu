@@ -172,7 +172,12 @@ async function refreshJobberAccessToken() {
   });
 }
 
-async function jobberGraphql<T>(query: string, variables: Record<string, unknown>, accessToken: string) {
+async function jobberGraphql<T>(
+  step: string,
+  query: string,
+  variables: Record<string, unknown>,
+  accessToken: string,
+) {
   const response = await fetch(graphqlUrl, {
     method: "POST",
     headers: {
@@ -182,50 +187,31 @@ async function jobberGraphql<T>(query: string, variables: Record<string, unknown
     body: JSON.stringify({ query, variables }),
   });
 
-  const result = (await response.json()) as GraphqlResponse<T>;
+  const responseBody = await response.text();
+  let result: GraphqlResponse<T>;
+
+  try {
+    result = responseBody ? (JSON.parse(responseBody) as GraphqlResponse<T>) : {};
+  } catch {
+    throw new Error(
+      `${step} failed with HTTP ${response.status}: ${responseBody.slice(0, 260) || "Jobber returned a non-JSON response."}`,
+    );
+  }
 
   if (!response.ok || result.errors?.length) {
     throw new Error(
-      result.errors?.map((error) => error.message).filter(Boolean).join("; ") ||
-        `Jobber API request failed with HTTP ${response.status}.`,
+      `${step} failed: ${
+        result.errors?.map((error) => error.message).filter(Boolean).join("; ") ||
+        `Jobber returned HTTP ${response.status}: ${responseBody.slice(0, 260)}`
+      }`,
     );
   }
 
   if (!result.data) {
-    throw new Error("Jobber returned an empty response.");
+    throw new Error(`${step} failed: Jobber returned an empty response.`);
   }
 
   return result.data;
-}
-
-async function findExistingClient(accessToken: string, email: string) {
-  const data = await jobberGraphql<{
-    clients: {
-      nodes: Array<{
-        id: string;
-        jobberWebUri?: string;
-        emails: Array<{ address?: string }>;
-      }>;
-    };
-  }>(
-    `query FindClient($searchTerm: String!) {
-      clients(searchTerm: $searchTerm, searchFields: [EMAILS, PRIMARY_EMAIL], first: 10) {
-        nodes {
-          id
-          jobberWebUri
-          emails {
-            address
-          }
-        }
-      }
-    }`,
-    { searchTerm: email },
-    accessToken,
-  );
-
-  return data.clients.nodes.find((client) =>
-    client.emails.some((clientEmail) => clientEmail.address?.toLowerCase() === email.toLowerCase()),
-  );
 }
 
 async function createClient(accessToken: string, fields: JobberQuoteFields) {
@@ -239,6 +225,7 @@ async function createClient(accessToken: string, fields: JobberQuoteFields) {
       userErrors: UserError[];
     };
   }>(
+    "Jobber client create",
     `mutation CreateClient($input: ClientCreateInput!) {
       clientCreate(input: $input) {
         client {
@@ -282,6 +269,7 @@ async function createRequest(accessToken: string, clientId: string, fields: Jobb
       userErrors: UserError[];
     };
   }>(
+    "Jobber request create",
     `mutation CreateRequest($input: RequestCreateInput!) {
       requestCreate(input: $input) {
         request {
@@ -317,6 +305,7 @@ async function createRequestNote(accessToken: string, requestId: string, fields:
       userErrors: UserError[];
     };
   }>(
+    "Jobber request note",
     `mutation CreateRequestNote($requestId: EncodedId!, $input: RequestCreateNoteInput!) {
       requestCreateNote(requestId: $requestId, input: $input) {
         userErrors {
@@ -357,15 +346,7 @@ export async function syncQuoteToJobber(fields: JobberQuoteFields): Promise<Jobb
   }
 
   let warning: string | undefined;
-  let existingClient: Awaited<ReturnType<typeof findExistingClient>> | undefined;
-
-  try {
-    existingClient = await findExistingClient(accessToken, fields.email);
-  } catch (error) {
-    warning = `Client lookup skipped: ${error instanceof Error ? error.message : "Jobber client lookup failed."}`;
-  }
-
-  const client = existingClient || (await createClient(accessToken, fields));
+  const client = await createClient(accessToken, fields);
   const request = await createRequest(accessToken, client.id, fields);
 
   try {
