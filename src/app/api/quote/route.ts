@@ -173,11 +173,20 @@ export async function POST(request: Request) {
 
   try {
     jobberStatus = await syncQuoteToJobber({ name, email, phone, propertyType, service, message });
+    if (jobberStatus.status === "synced") {
+      console.info("Jobber quote sync succeeded", {
+        requestId: jobberStatus.requestId,
+        clientId: jobberStatus.clientId,
+      });
+    } else {
+      console.warn("Jobber quote sync skipped", { message: jobberStatus.message });
+    }
   } catch (error) {
     jobberStatus = {
       status: "failed",
       message: error instanceof Error ? error.message : "Jobber sync failed.",
     };
+    console.error("Jobber quote sync failed", { message: jobberStatus.message });
   }
 
   try {
