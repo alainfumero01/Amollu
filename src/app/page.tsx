@@ -176,13 +176,6 @@ export default function HomePage() {
 
         <div className={styles.heroVisual} aria-label="Amollu Services property care overview">
           <div className={styles.visualTop}>
-            <Image
-              src="/brand/amollu-badge-dark.png"
-              alt=""
-              width={220}
-              height={120}
-              priority
-            />
             <span>Clean. Maintained. Ready.</span>
           </div>
           <div className={styles.propertyGrid}>
@@ -364,7 +357,7 @@ export default function HomePage() {
       <footer className={styles.footer}>
         <div>
           <Image
-            src="/brand/amollu-logo-horizontal-dark.png"
+            src="/brand/amollu-logo-horizontal-dark.svg"
             alt="Amollu Services"
             width={250}
             height={137}
