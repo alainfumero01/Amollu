@@ -18,6 +18,7 @@ export type JobberSyncResult =
       requestId: string;
       clientUrl?: string;
       requestUrl?: string;
+      warning?: string;
     };
 
 type JobberTokenResponse = {
@@ -124,7 +125,9 @@ async function requestToken(params: Record<string, string>) {
   const tokens = (await response.json()) as JobberTokenResponse;
 
   if (!response.ok || !tokens.access_token) {
-    throw new Error(tokens.error_description || tokens.error || "Jobber authorization failed.");
+    throw new Error(
+      tokens.error_description || tokens.error || `Jobber authorization failed with HTTP ${response.status}.`,
+    );
   }
 
   return tokens;
@@ -171,7 +174,10 @@ async function jobberGraphql<T>(query: string, variables: Record<string, unknown
   const result = (await response.json()) as GraphqlResponse<T>;
 
   if (!response.ok || result.errors?.length) {
-    throw new Error(result.errors?.map((error) => error.message).filter(Boolean).join("; ") || "Jobber API request failed.");
+    throw new Error(
+      result.errors?.map((error) => error.message).filter(Boolean).join("; ") ||
+        `Jobber API request failed with HTTP ${response.status}.`,
+    );
   }
 
   if (!result.data) {
@@ -192,7 +198,7 @@ async function findExistingClient(accessToken: string, email: string) {
     };
   }>(
     `query FindClient($searchTerm: String!) {
-      clients(searchTerm: $searchTerm, first: 10) {
+      clients(searchTerm: $searchTerm, searchFields: [EMAILS, PRIMARY_EMAIL], first: 10) {
         nodes {
           id
           jobberWebUri
@@ -249,7 +255,7 @@ async function createClient(accessToken: string, fields: JobberQuoteFields) {
   );
 
   if (!data.clientCreate.client || data.clientCreate.userErrors.length) {
-    throw new Error(formatJobberErrors(data.clientCreate.userErrors));
+    throw new Error(`Jobber client create failed: ${formatJobberErrors(data.clientCreate.userErrors)}`);
   }
 
   return data.clientCreate.client;
@@ -288,7 +294,7 @@ async function createRequest(accessToken: string, clientId: string, fields: Jobb
   );
 
   if (!data.requestCreate.request || data.requestCreate.userErrors.length) {
-    throw new Error(formatJobberErrors(data.requestCreate.userErrors));
+    throw new Error(`Jobber request create failed: ${formatJobberErrors(data.requestCreate.userErrors)}`);
   }
 
   return data.requestCreate.request;
@@ -319,7 +325,7 @@ async function createRequestNote(accessToken: string, requestId: string, fields:
   );
 
   if (data.requestCreateNote.userErrors.length) {
-    throw new Error(formatJobberErrors(data.requestCreateNote.userErrors));
+    throw new Error(`Jobber request note failed: ${formatJobberErrors(data.requestCreateNote.userErrors)}`);
   }
 }
 
@@ -339,10 +345,24 @@ export async function syncQuoteToJobber(fields: JobberQuoteFields): Promise<Jobb
     throw new Error("Jobber did not return an access token.");
   }
 
-  const existingClient = await findExistingClient(accessToken, fields.email);
+  let warning: string | undefined;
+  let existingClient: Awaited<ReturnType<typeof findExistingClient>> | undefined;
+
+  try {
+    existingClient = await findExistingClient(accessToken, fields.email);
+  } catch (error) {
+    warning = `Client lookup skipped: ${error instanceof Error ? error.message : "Jobber client lookup failed."}`;
+  }
+
   const client = existingClient || (await createClient(accessToken, fields));
   const request = await createRequest(accessToken, client.id, fields);
-  await createRequestNote(accessToken, request.id, fields);
+
+  try {
+    await createRequestNote(accessToken, request.id, fields);
+  } catch (error) {
+    const noteWarning = `Request note skipped: ${error instanceof Error ? error.message : "Jobber request note failed."}`;
+    warning = warning ? `${warning} ${noteWarning}` : noteWarning;
+  }
 
   return {
     status: "synced",
@@ -350,5 +370,6 @@ export async function syncQuoteToJobber(fields: JobberQuoteFields): Promise<Jobb
     requestId: request.id,
     clientUrl: client.jobberWebUri,
     requestUrl: request.jobberWebUri,
+    warning,
   };
 }

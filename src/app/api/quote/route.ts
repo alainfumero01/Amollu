@@ -80,7 +80,7 @@ function ownerHtml(fields: {
 }, jobberStatus: JobberEmailStatus) {
   const jobberValue =
     jobberStatus.status === "synced"
-      ? `Synced to request ${jobberStatus.requestId}`
+      ? `Synced to request ${jobberStatus.requestId}${jobberStatus.warning ? ` (${jobberStatus.warning})` : ""}`
       : jobberStatus.message;
   const rows = [
     ["Name", fields.name],
@@ -177,6 +177,7 @@ export async function POST(request: Request) {
       console.info("Jobber quote sync succeeded", {
         requestId: jobberStatus.requestId,
         clientId: jobberStatus.clientId,
+        warning: jobberStatus.warning,
       });
     } else {
       console.warn("Jobber quote sync skipped", { message: jobberStatus.message });
@@ -206,7 +207,9 @@ export async function POST(request: Request) {
         `Requested service: ${service}`,
         `Jobber sync: ${
           jobberStatus.status === "synced"
-            ? `Synced to request ${jobberStatus.requestId}${jobberStatus.requestUrl ? ` (${jobberStatus.requestUrl})` : ""}`
+            ? `Synced to request ${jobberStatus.requestId}${jobberStatus.requestUrl ? ` (${jobberStatus.requestUrl})` : ""}${
+                jobberStatus.warning ? ` Warning: ${jobberStatus.warning}` : ""
+              }`
             : jobberStatus.message
         }`,
         "",
