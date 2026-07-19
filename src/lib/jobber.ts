@@ -47,7 +47,7 @@ function readEnv(name: string) {
 }
 
 function getRedirectUri() {
-  return readEnv("JOBBER_REDIRECT_URI") || "https://amolluservices.com/api/jobber/callback";
+  return readEnv("JOBBER_REDIRECT_URI") || "https://www.amolluservices.com/api/jobber/callback";
 }
 
 function getClientCredentials() {

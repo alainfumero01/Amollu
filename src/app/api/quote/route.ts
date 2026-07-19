@@ -20,7 +20,7 @@ type JobberEmailStatus =
 
 const destinationEmail = process.env.QUOTE_TO_EMAIL || "Info@amollu.com";
 const phoneDisplay = "682-560-0797";
-const publicSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://amollu.vercel.app";
+const publicSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.amolluservices.com";
 const logoUrl = `${publicSiteUrl}/brand/amollu-logo-horizontal.png`;
 
 function readString(value: unknown) {
@@ -126,7 +126,7 @@ function customerHtml(name: string) {
         <h1 style="margin:0 0 18px;font-size:28px;line-height:1.15;color:#101936;">Thank you for contacting Amollu Services, ${escapeHtml(name)}.</h1>
         <p style="margin:0 0 16px;color:#5f687b;font-size:16px;line-height:1.7;">We received your request and will review the details you shared. Someone from Amollu Services will follow up as soon as possible.</p>
         <p style="margin:0 0 22px;color:#5f687b;font-size:16px;line-height:1.7;">If you need to reach us sooner, call us directly at <a href="tel:6825600797" style="color:#c98924;font-weight:700;text-decoration:none;">${phoneDisplay}</a>.</p>
-        <a href="https://amollu.vercel.app" style="display:inline-block;padding:14px 20px;background:#c98924;color:#ffffff;border-radius:6px;text-decoration:none;font-weight:700;">Visit Amollu Services</a>
+        <a href="${publicSiteUrl}" style="display:inline-block;padding:14px 20px;background:#c98924;color:#ffffff;border-radius:6px;text-decoration:none;font-weight:700;">Visit Amollu Services</a>
       </td>
     </tr>`);
 }
