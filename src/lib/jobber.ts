@@ -122,7 +122,18 @@ async function requestToken(params: Record<string, string>) {
     body: new URLSearchParams(params),
   });
 
-  const tokens = (await response.json()) as JobberTokenResponse;
+  const responseBody = await response.text();
+  let tokens: JobberTokenResponse;
+
+  try {
+    tokens = responseBody ? (JSON.parse(responseBody) as JobberTokenResponse) : {};
+  } catch {
+    throw new Error(
+      response.ok
+        ? "Jobber authorization returned an unreadable response."
+        : `Jobber authorization failed with HTTP ${response.status}: ${responseBody.slice(0, 220)}`,
+    );
+  }
 
   if (!response.ok || !tokens.access_token) {
     throw new Error(
