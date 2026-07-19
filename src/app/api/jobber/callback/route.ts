@@ -76,9 +76,8 @@ export async function GET(request: Request) {
 
   if (!code) {
     return page(
-      "Missing Jobber authorization code",
-      "<h1>Missing authorization code.</h1><p>Start again from <a href=\"/api/jobber/connect\">the Jobber connect link</a>.</p>",
-      400,
+      "Connect Jobber",
+      "<h1>Ready to connect Jobber.</h1><p>This callback page is working. To authorize Jobber, start from <a href=\"/api/jobber/connect\">the Jobber connect link</a> so Jobber can send the authorization code back here.</p>",
     );
   }
 
